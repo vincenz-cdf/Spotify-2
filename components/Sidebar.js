@@ -11,10 +11,25 @@ import {
 
 import React from 'react'
 import { signOut, useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
+import useSpotify from "../hooks/useSpotify";
 
 function Sidebar() {
+  //Gestion de session
   const {data: session, statut} = useSession();
   console.log(session);
+
+  //Gestion des playlists de l'user avec useSpotify par le token
+  const [playlists, setPlaylists] = useState([]);
+  const spotifyApi = useSpotify();
+  useEffect(() => {
+      if (spotifyApi.getAccessToken()) {
+          spotifyApi.getUserPlaylists().then((data) => {
+              setPlaylists(data.body.items);
+          });
+      }
+  }, [session, spotifyApi])
+  console.log(playlists);
 
   return (
     <div className="text-gray-500 p-5 text-sm border-r
@@ -58,14 +73,11 @@ function Sidebar() {
         </button>
         <hr className="border-t-[0.1px] border-gray-900"/>
 
-        <p className="cursor-pointer hover:text-white">Playlist name...</p>
-        <p className="cursor-pointer hover:text-white">Playlist name...</p>
-        <p className="cursor-pointer hover:text-white">Playlist name...</p>
-        <p className="cursor-pointer hover:text-white">Playlist name...</p>
-        <p className="cursor-pointer hover:text-white">Playlist name...</p>
-        <p className="cursor-pointer hover:text-white">Playlist name...</p>
-        <p className="cursor-pointer hover:text-white">Playlist name...</p>
-        <p className="cursor-pointer hover:text-white">Playlist name...</p>  
+        {playlists.map((playlist) => (
+            <p key={playlist.id} className="cursor-pointer hover:text-white">
+                {playlist.name}
+            </p>
+        ))}
       </div>
     </div>
   )
